@@ -8,28 +8,30 @@ public class PlayerController : MonoBehaviour
     private bool isFacingRight = true;
     private SpriteRenderer sprite;
     float horizontal;
+
+    [Header("Normal Paramters")]
+    public int Player_HP;
     public float playerSpeed;
     public float JumpForce;
     public bool OnGround = true;
-    public LayerMask whatIsGround;
-    public float groundCheckRange;
-    public GameObject GroundCheckPos;
     public bool Sliding = false;
+    public CapsuleCollider2D PlayerCollider;
+
+    [Header("Detections")]
+    public float groundCheckRange;
+    public LayerMask whatIsGround;
+    public GameObject GroundCheckPos;
 
     private Animator anim;
 
-    //for attack
+    [Header("Attacking")]
+    public int damage;
     private float timeBtwAttack;
     public float startTimeBtwAttack;
-
-    public Transform attackPos;
     public float attackRange;
+    public Transform attackPos;
     public LayerMask whatIsEnemy;
-    public int damage;
-
-    public CapsuleCollider2D PlayerCollider;
-
-    // Start is called before the first frame update
+   
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -66,7 +68,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //attacking
-        if (timeBtwAttack <= 0)
+        if (timeBtwAttack <= 0)//for setting time between attacks(so that player can only attack after specified time interval between first attack and another)
         {
             if (Input.GetMouseButtonDown(0))
             {
@@ -75,6 +77,7 @@ public class PlayerController : MonoBehaviour
                 for (int i = 0; i < enemiesToHit.Length; i++)
                 {
                     Debug.Log("Damage enemy");
+                    enemiesToHit[i].GetComponent<enemy>().Damagetaken(damage);
                 }
                 timeBtwAttack = startTimeBtwAttack;
             }
@@ -87,10 +90,17 @@ public class PlayerController : MonoBehaviour
         {
             timeBtwAttack -= Time.deltaTime;
         }
+
+        //taking Damage
+        if(Player_HP<=0)
+        {
+            Destroy(this.gameObject);
+        }
     }
-    // Update is called once per frame
+
     void FixedUpdate()
     {
+        //movement
         horizontal = Input.GetAxis("Horizontal");
         Move();
         if(horizontal < 0 && isFacingRight)
@@ -114,6 +124,8 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         rb.velocity = new Vector2(horizontal * playerSpeed, rb.velocity.y);
+
+        //for sliding
         if (Sliding && rb.velocity.x != 0)
         {
             PlayerCollider.size = new Vector2(2.32f, 2.7f);
@@ -129,12 +141,12 @@ public class PlayerController : MonoBehaviour
     {
         if(isFacingRight)
         {
-            sprite.flipX = true;
+            transform.rotation = new Quaternion(0, 180, 0,0);
             isFacingRight = !isFacingRight;
         }
         else
         {
-            sprite.flipX = false;
+            transform.rotation = new Quaternion(0, 0, 0, 0);
             isFacingRight = !isFacingRight;
         }
     }
@@ -156,5 +168,9 @@ public class PlayerController : MonoBehaviour
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(GroundCheckPos.transform.position, groundCheckRange);
         Gizmos.DrawWireSphere(attackPos.transform.position, attackRange);
+    }
+    public void Damagetaken(int Damage)
+    {
+        Player_HP -= Damage;
     }
 }

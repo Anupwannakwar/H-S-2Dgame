@@ -7,20 +7,30 @@ public class enemy : MonoBehaviour
     private Rigidbody2D zrb;
     private Collider2D EnemyCollider;
     private SpriteRenderer sprite;
-    public Transform Target;
+
+    [Header("Normal Paramters")]
+    public int Enemy_Hp = 100;
+    public float Enemyspeed;
+    public Transform Target; 
+    public PlayerController pc;
+
+    [Header("Detections")]
     public LayerMask WhatisPlayer;
     public LayerMask WhatisTower;
+    public float StoppingDistance;
+    public float PlayerCheckRadius;
 
     private Animator anim;
 
-    public float Enemyspeed;
-    public float PlayerCheckRadius;
-
-    //For Attack
-    public float Damage;
+    [Header("For Attacking")]
+    public int Damage;
+    public Transform attackPos;
     public float AttackRadius;
-    public float StoppingDistance;
-    //public bool isAttacking;
+    public bool isAttackingTower;
+    private float timeBtwAttack;
+    private float timeBtwAttack1;
+    public float startTimeBtwAttack;
+    
 
     // Start is called before the first frame update
     void Start()
@@ -31,6 +41,7 @@ public class enemy : MonoBehaviour
         EnemyCollider = GetComponent<CapsuleCollider2D>();
 
         Target = GameObject.FindGameObjectWithTag("Tower").GetComponent<Transform>();
+        pc = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
@@ -42,42 +53,70 @@ public class enemy : MonoBehaviour
         }
 
         //Attacking Tower
-        else if (Vector2.Distance(transform.position, Target.position) < StoppingDistance)
+        else if (Vector2.Distance(attackPos.position, Target.position) < StoppingDistance)
         {
-            anim.SetBool("IsAttacking", true);
-            //isAttacking = true;
-            Collider2D[] TowerToHit = Physics2D.OverlapCircleAll(transform.position, AttackRadius, WhatisTower);
-            for (int i = 0; i < TowerToHit.Length; i++)
+            if(timeBtwAttack1 <= 0)
             {
-                Debug.Log("Damage Tower");
+                anim.SetBool("IsAttacking", true);
+                isAttackingTower = true;
+                Collider2D[] TowerToHit = Physics2D.OverlapCircleAll(transform.position, AttackRadius, WhatisTower);
+                for (int i = 0; i < TowerToHit.Length; i++)
+                {
+                    Debug.Log("Damage Tower");
+                    TowerToHit[i].GetComponent<Tower>().DamageTaken(Damage);
+                }
+                timeBtwAttack1 = startTimeBtwAttack;
             }
+            timeBtwAttack1 -= Time.deltaTime;
         }
         else
         {
             anim.SetBool("IsAttacking", false);
-            //isAttacking = false;
+            isAttackingTower = false;
+            
         }
+        
 
-        bool PlayerToHit = Physics2D.OverlapCircle(transform.position, AttackRadius, WhatisPlayer);
- 
-            if(PlayerToHit)
+        //Attacking player
+        bool PlayerToHit = Physics2D.OverlapCircle(attackPos.position, AttackRadius, WhatisPlayer);
+        if (!isAttackingTower && timeBtwAttack <= 0)
+        {
+            if (PlayerToHit )
             {
                 anim.SetBool("IsAttacking", true);
+                pc.Damagetaken(Damage);
                 Debug.Log("Damage player");
+                timeBtwAttack = startTimeBtwAttack;
                 //isAttacking = true;
             }
-            if(!PlayerToHit)
+            if (!PlayerToHit)
             {
                 anim.SetBool("IsAttacking", false);
+                isAttackingTower = false;
             }
+        }
+        else
+        {
+            timeBtwAttack -= Time.deltaTime;
+        }
+
+        //Taking damage
+        if (Enemy_Hp<=0)
+        {
+            Destroy(this.gameObject);
+        }
     }
 
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, AttackRadius);
+        Gizmos.DrawWireSphere(attackPos.position, AttackRadius);
         Gizmos.color = Color.black;
-        Gizmos.DrawWireSphere(transform.position, PlayerCheckRadius);
+        Gizmos.DrawWireSphere(attackPos.position, PlayerCheckRadius);
+    }
+    public void Damagetaken(int Damage)
+    {
+        Enemy_Hp -= Damage;
     }
 }
