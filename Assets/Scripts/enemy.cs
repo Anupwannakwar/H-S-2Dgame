@@ -11,14 +11,16 @@ public class enemy : MonoBehaviour
     [Header("Normal Paramters")]
     public int Enemy_Hp = 100;
     public float Enemyspeed;
-    public Transform Target; 
-    public PlayerController pc;
+    public int IncScore;
+    private Transform Target; 
+    private PlayerController pc;
 
     [Header("Detections")]
     public LayerMask WhatisPlayer;
     public LayerMask WhatisTower;
     public float StoppingDistance;
     public float PlayerCheckRadius;
+    public bool enPlayer;
 
     private Animator anim;
 
@@ -30,6 +32,7 @@ public class enemy : MonoBehaviour
     private float timeBtwAttack;
     private float timeBtwAttack1;
     public float startTimeBtwAttack;
+    private ScoreManager sm;
     
 
     // Start is called before the first frame update
@@ -42,12 +45,14 @@ public class enemy : MonoBehaviour
 
         Target = GameObject.FindGameObjectWithTag("Tower").GetComponent<Transform>();
         pc = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
+        sm = GameObject.FindGameObjectWithTag("SM").GetComponent<ScoreManager>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Vector2.Distance(transform.position, Target.position) > StoppingDistance)
+        if (Vector2.Distance(transform.position, Target.position) > StoppingDistance && !enPlayer)
         {
             transform.position = Vector2.MoveTowards(transform.position, Target.position, Enemyspeed * Time.deltaTime);
         }
@@ -69,7 +74,7 @@ public class enemy : MonoBehaviour
             }
             timeBtwAttack1 -= Time.deltaTime;
         }
-        else
+        else if(!enPlayer)
         {
             anim.SetBool("IsAttacking", false);
             isAttackingTower = false;
@@ -87,12 +92,13 @@ public class enemy : MonoBehaviour
                 pc.Damagetaken(Damage);
                 Debug.Log("Damage player");
                 timeBtwAttack = startTimeBtwAttack;
-                //isAttacking = true;
+                enPlayer = true;
             }
             if (!PlayerToHit)
             {
                 anim.SetBool("IsAttacking", false);
                 isAttackingTower = false;
+                enPlayer = false;
             }
         }
         else
@@ -103,6 +109,7 @@ public class enemy : MonoBehaviour
         //Taking damage
         if (Enemy_Hp<=0)
         {
+            sm.updateScore(IncScore);
             Destroy(this.gameObject);
         }
     }
