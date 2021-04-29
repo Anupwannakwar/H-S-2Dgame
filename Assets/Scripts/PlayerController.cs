@@ -7,7 +7,9 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private bool isFacingRight = true;
     private SpriteRenderer sprite;
-    float horizontal;
+    private float horizontal;
+    public AudioClip ac;
+    public AudioSource asc;
 
     [Header("Normal Paramters")]
     public int Player_HP;
@@ -16,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public bool OnGround = true;
     public bool Sliding = false;
     public CapsuleCollider2D PlayerCollider;
+    public Healthbar healthbar;
 
     [Header("Detections")]
     public float groundCheckRange;
@@ -38,6 +41,7 @@ public class PlayerController : MonoBehaviour
         sprite = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
         PlayerCollider = GetComponent<CapsuleCollider2D>();
+        healthbar.setmaxhealth(Player_HP);
     }
 
     private void Update()
@@ -94,7 +98,7 @@ public class PlayerController : MonoBehaviour
         //taking Damage
         if(Player_HP<=0)
         {
-            Destroy(this.gameObject);
+            anim.SetBool("IsDead", true);
         }
     }
 
@@ -172,5 +176,10 @@ public class PlayerController : MonoBehaviour
     public void Damagetaken(int Damage)
     {
         Player_HP -= Damage;
+        healthbar.sethealth(Player_HP);
+    }
+    public void Destroyplayer()
+    {
+        Destroy(this.gameObject);
     }
 }

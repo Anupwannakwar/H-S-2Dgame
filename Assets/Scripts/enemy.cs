@@ -109,8 +109,8 @@ public class enemy : MonoBehaviour
         //Taking damage
         if (Enemy_Hp<=0)
         {
-            sm.updateScore(IncScore);
-            Destroy(this.gameObject);
+            anim.SetBool("IsDead", true);
+            Debug.Log("enemy dead animation played");
         }
     }
 
@@ -125,5 +125,10 @@ public class enemy : MonoBehaviour
     public void Damagetaken(int Damage)
     {
         Enemy_Hp -= Damage;
+    }
+    public void Destroyenemy()
+    {
+        sm.updateScore(IncScore);
+        Destroy(this.gameObject);
     }
 }

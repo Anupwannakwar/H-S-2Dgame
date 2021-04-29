@@ -6,12 +6,12 @@ public class Tower : MonoBehaviour
 {
     private Rigidbody2D trb;
     private BoxCollider2D colli;
+    public Healthbar healthbar;
 
     public int Tower_hp;
-
-    void Start()
+    private void Start()
     {
-        
+        healthbar.setmaxhealth(Tower_hp);
     }
 
     // Update is called once per frame
@@ -25,5 +25,6 @@ public class Tower : MonoBehaviour
     public void DamageTaken(int damage)
     {
         Tower_hp -= damage;
+        healthbar.sethealth(Tower_hp);
     }
 }
