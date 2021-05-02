@@ -7,7 +7,6 @@ public class Spawnertest : MonoBehaviour
     public GameObject Spawn;
     public GameObject Zombie;
     public bool stopspawning = false;
-    int[] spawnquantity = new int[3] { 1,2,3 };
     int[] spawntime = new int[10] { 1,2,3,4,5,6,7,8,9,10 };
     int i;
     public float startSpwanTime;

@@ -110,7 +110,8 @@ public class enemy : MonoBehaviour
         if (Enemy_Hp<=0)
         {
             anim.SetBool("IsDead", true);
-            Debug.Log("enemy dead animation played");
+            Destroy(this.EnemyCollider);
+            Destroy(this.zrb);
         }
     }
 

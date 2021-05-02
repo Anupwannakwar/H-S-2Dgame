@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,8 +9,8 @@ public class PlayerController : MonoBehaviour
     private bool isFacingRight = true;
     private SpriteRenderer sprite;
     private float horizontal;
-    public AudioClip ac;
-    public AudioSource asc;
+    public GameObject GOpanel;
+    public GameObject GIpanel;
 
     [Header("Normal Paramters")]
     public int Player_HP;
@@ -107,15 +108,15 @@ public class PlayerController : MonoBehaviour
         //movement
         horizontal = Input.GetAxis("Horizontal");
         Move();
-        if(horizontal < 0 && isFacingRight)
+        if(horizontal < 0 && isFacingRight)// if movement is happening and facing right then flip player facing right
         {
             flip();
         }
-        else if(horizontal > 0 && !isFacingRight)
+        else if(horizontal > 0 && !isFacingRight)// if movement is happening and facing left then flip player facing left
         {
             flip();
         }
-        if (Mathf.Abs(horizontal * playerSpeed) > 0 && OnGround)
+        if (Mathf.Abs(horizontal * playerSpeed) > 0 && OnGround)//if player is moving and is on ground then perform running animation
         {
             anim.SetBool("IsRunning", true);
         }
@@ -125,6 +126,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    //move funtion
     private void Move()
     {
         rb.velocity = new Vector2(horizontal * playerSpeed, rb.velocity.y);
@@ -141,6 +143,8 @@ public class PlayerController : MonoBehaviour
         }
 
     }
+
+    // flipping character when looking another side
     private void flip()
     {
         if(isFacingRight)
@@ -154,6 +158,8 @@ public class PlayerController : MonoBehaviour
             isFacingRight = !isFacingRight;
         }
     }
+
+    //jump function
     private void jump()
     {
         rb.AddForce(Vector2.up * JumpForce);
@@ -167,19 +173,36 @@ public class PlayerController : MonoBehaviour
         yield break;
     }
 
+    //gizmos for player detection ranges
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(GroundCheckPos.transform.position, groundCheckRange);
         Gizmos.DrawWireSphere(attackPos.transform.position, attackRange);
     }
+
+    //damage taking function as well as display player current HP
     public void Damagetaken(int Damage)
     {
         Player_HP -= Damage;
         healthbar.sethealth(Player_HP);
     }
+
+    // destroy player function
     public void Destroyplayer()
     {
         Destroy(this.gameObject);
+        GIpanel.SetActive(false);
+        GOpanel.SetActive(true);
+    }
+
+    // on trigger for heart detection and increasing player current HP
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.tag == ("Heart"))
+        {
+            Destroy(other.gameObject);
+            Player_HP = Player_HP + 20;
+        }
     }
 }
